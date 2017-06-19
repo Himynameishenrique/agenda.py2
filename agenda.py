@@ -244,22 +244,25 @@ def organizar(linhas):
     aux = linhas.pop(0)
     aux = aux.strip()
     aux = aux.split(' ')
-    if dataValida(aux[0]) and len(data)== 0:
-      data=aux.pop(0)
-    if horaValida(aux[0]) and len(hora)== 0:
-      hora=aux.pop(0)
-    if prioridadeValida(aux[0]) and len(pri)== 0:
-      pri=aux.pop(0)
-      
-    # agora temos a descrição
-    if len(aux) > 1: # descricao e mais algo pelo menos
-      if projetoValido(aux[len(aux)-1]) and len(projeto)== 0:
-        projeto=aux.pop(len(aux)-1)
-    if len(aux) > 1: # necessário checar pois o pop pode ter tirado o último elemento que não era descrição
-      if contextoValido(aux[len(aux)-1]) and len(contexto)== 0:
-        contexto=aux.pop(len(aux)-1)
-    desc = ' '.join(aux)
-    itens.append((desc, (data, hora, pri, contexto, projeto)))
+    try:  #Captura o IndexError que ocorre quando esgota a lista de comandos e não deixa o programa fechar
+      if dataValida(aux[0]) and len(data)== 0: #Checa se a variável já foi preenchida em uma iteração anterior
+        data=aux.pop(0)
+      if horaValida(aux[0]) and len(hora)== 0:
+        hora=aux.pop(0)
+      if prioridadeValida(aux[0]) and len(pri)== 0:
+        pri=aux.pop(0)
+        
+      # agora temos a descrição
+      if len(aux) > 1: # descricao e mais algo pelo menos
+        if projetoValido(aux[len(aux)-1]) and len(projeto)== 0:
+          projeto=aux.pop(len(aux)-1)
+      if len(aux) > 1: # necessário checar pois o pop pode ter tirado o último elemento que não era descrição
+        if contextoValido(aux[len(aux)-1]) and len(contexto)== 0:
+          contexto=aux.pop(len(aux)-1)
+      desc = ' '.join(aux)
+      itens.append((desc, (data, hora, pri, contexto, projeto)))
+    except IndexError:
+      raise IndexError('Formato inválido')
     
   return itens
 
@@ -606,7 +609,11 @@ def processarComandos(comandos) :
     if len(comandos) == 0:
       print("Preciso de mais argumentos!")
       return
-    itemParaAdicionar = organizar([' '.join(comandos)])[0]
+    try:
+      itemParaAdicionar = organizar([' '.join(comandos)])[0]
+    except IndexError as error:
+      print(error)
+      return
     # itemParaAdicionar = (descricao, (prioridade, data, hora, contexto, projeto))
     adicionar(itemParaAdicionar[0], itemParaAdicionar[1]) # novos itens não têm prioridade
     
